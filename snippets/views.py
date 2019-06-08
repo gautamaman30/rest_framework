@@ -1,16 +1,14 @@
 from .models import Snippet
 from .serializers import SnippetSerializer
-from rest_framework import generics, mixins
-
+from rest_framework import generics
 
 
 """
-using mixins class (which provide same behaviour as we were doing with class based view)
-, GENERICAPIView is the base class for all generic view and mixins is inherited them 
+using generic class based views which are already mixed-in 
 """
 
 
-class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+class SnippetList(generics.ListCreateAPIView):
 
     """
     to create new snippet or list all snippets
@@ -19,14 +17,8 @@ class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(self, request, *args, **kwargs)
-
-
-class SnippetDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
 
     """
     to get, put(update) and delete a particular snippet
@@ -34,12 +26,3 @@ class SnippetDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.D
 
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-
-    def retrieve(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
