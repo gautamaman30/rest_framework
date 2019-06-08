@@ -1,55 +1,45 @@
 from .models import Snippet
 from .serializers import SnippetSerializer
-from rest_framework.decorators import api_view
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework import generics, mixins
 
 
-@api_view(['GET', 'POST'])
-def snippet_list(request, format=None):
-    """
-    to show or create
-    if request method is get we return snippet otherwise we create a new snippet
-    """
 
-    if request.method == 'GET':
-        snippets = Snippet.objects.all()
-        serializer = SnippetSerializer(snippets, many=True)
-        return Response(serializer.data)
-
-    elif request.method == 'POST':
-        serializer = SnippetSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+"""
+using mixins class (which provide same behaviour as we were doing with class based view)
+, GENERICAPIView is the base class for all generic view and mixins is inherited them 
+"""
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def snippet_detail(request, pk, format=None):
+class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
 
     """
-    to retrieve , update and delete a particular snippet
+    to create new snippet or list all snippets
     """
-    try:
-        snippet = Snippet.objects.get(pk=pk)
-    except Snippet.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = SnippetSerializer(snippet)
-        return Response(serializer.data)
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
 
-    elif request.method == 'PUT':
-        serializer = SnippetSerializer(snippet, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-    elif request.method == 'DELETE':
-        snippet.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post(self, request, *args, **kwargs):
+        return self.create(self, request, *args, **kwargs)
 
 
+class SnippetDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
 
+    """
+    to get, put(update) and delete a particular snippet
+    """
+
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
